@@ -1,0 +1,18 @@
+# .dockerignore
+
+# Node
+node_modules
+npm-debug.log
+
+# Maven
+target/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated
+.DS_Store
+Thumbs.db
