@@ -1,0 +1,26 @@
+# Experiment with using Tilt for local development
+
+My dev environment
+* HP Laptop (Intel Core i7, 64GB RAM, 1TB SDD)
+* WSL2 w/ Docker
+
+## Install WSL2
+
+## Install Docker
+
+Install the following
+* kubectl - https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
+* go (using PPA) - https://go.dev/wiki/Ubuntu
+* kind (using go install) - https://kind.sigs.k8s.io/docs/user/quick-start/#installing-with-go-install
+* ctlptl (using go install) - https://github.com/tilt-dev/ctlptl?tab=readme-ov-file#go-install
+
+Move the commands that were installed via Go
+* sudo mv $(go env GOPATH)/bin/kind /usr/local/bin/kind
+* sudo mv $(go env GOPATH)/bin/ctlptl /usr/local/bin/ctlptl
+
+Spin up a KIND cluster with a built-in registry on a pre-determined port
+https://github.com/tilt-dev/ctlptl?tab=readme-ov-file#kind-with-a-built-in-registry-at-a-pre-determined-port
+
+## Install Tilt
+https://docs.tilt.dev/install.html#linux
+
