@@ -12,13 +12,21 @@ spec:
       labels:
         app: backend
     spec:
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
       initContainers:
       - name: wait-for-postgres
         image: postgres:13
-        command: ['sh', '-c', 
-          'until pg_isready -h postgres -p 5432 -U postgres; do echo waiting for postgres; sleep 2; done;']
+        command: ['sh', '-c', '
+          echo "Testing DNS resolution..." &&
+          getent hosts postgres &&
+          echo "Testing network connectivity..." &&
+          nc -zv postgres 5432 &&
+          echo "Testing PostgreSQL connection..." &&
+          PGPASSWORD=$POSTGRES_PASSWORD pg_isready -h postgres -p 5432 -U postgres
+        ']
         env:
-        - name: PGPASSWORD
+        - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: postgres-secret
