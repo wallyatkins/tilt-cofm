@@ -26,14 +26,16 @@ k8s_yaml([
     'k8s/backend.yaml',
     'k8s/postgres.yaml',
     'k8s/postgres-pvc.yaml',
-    'k8s/postgres-secret.yaml'
+    'k8s/postgres-secret.yaml',
+    'k8s/nexus.yaml'
 ])
 
 # Port forwards
 k8s_resource('frontend', port_forwards='3000')
 k8s_resource('backend', port_forwards='8080')
 k8s_resource('postgres', port_forwards='5432')
+k8s_resource('nexus', port_forwards='8081')
 
 # Resource dependencies
-k8s_resource('backend', resource_deps=['postgres'])
+k8s_resource('backend', resource_deps=['postgres', 'nexus'])
 k8s_resource('frontend', resource_deps=['backend'])
