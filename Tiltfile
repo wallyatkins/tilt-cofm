@@ -21,13 +21,13 @@ docker_build(
 )
 
 # Kubernetes resources
+k8s_yaml('k8s/postgres-pvc.yaml')
+k8s_yaml('k8s/postgres-secret.yaml')
+k8s_yaml('k8s/nexus.yaml')
 k8s_yaml([
     'k8s/frontend.yaml',
     'k8s/backend.yaml',
-    'k8s/postgres.yaml',
-    'k8s/postgres-pvc.yaml',
-    'k8s/postgres-secret.yaml',
-    'k8s/nexus.yaml'
+    'k8s/postgres.yaml'
 ])
 
 # Port forwards
