@@ -14,14 +14,33 @@ spec:
     spec:
       initContainers:
       - name: wait-for-postgres
-        image: busybox:1.28
-        command: ['sh', '-c', 'until nslookup postgres; do echo waiting for postgres; sleep 2; done;']
+        image: postgres:13
+        command: ['sh', '-c', 
+          'until pg_isready -h postgres -p 5432 -U postgres; do echo waiting for postgres; sleep 2; done;']
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
       containers:
       - name: backend
         image: backend:latest
         imagePullPolicy: Never
         ports:
         - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
         env:
         - name: POSTGRES_PASSWORD
           valueFrom:
