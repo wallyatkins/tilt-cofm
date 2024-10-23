@@ -7,7 +7,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 5Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -22,6 +22,13 @@ spec:
       labels:
         app: nexus
     spec:
+      initContainers:
+      - name: init-nexus-data
+        image: busybox
+        command: ['sh', '-c', 'chown -R 200:200 /nexus-data']
+        volumeMounts:
+        - name: nexus-data
+          mountPath: /nexus-data
       containers:
       - name: nexus
         image: sonatype/nexus3:3.41.1
@@ -32,11 +39,23 @@ spec:
           mountPath: /nexus-data
         resources:
           requests:
-            memory: "2Gi"
-            cpu: "500m"
+            memory: "512Mi"
+            cpu: "250m"
           limits:
-            memory: "4Gi"
-            cpu: "2000m"
+            memory: "2Gi"
+            cpu: "1000m"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8081
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8081
+          initialDelaySeconds: 120
+          periodSeconds: 30
       volumes:
       - name: nexus-data
         persistentVolumeClaim:
