@@ -3,8 +3,10 @@ FROM maven:3.8.4-openjdk-11-slim AS build
 
 WORKDIR /app
 
-# Copy Maven settings first
-COPY settings.xml /root/.m2/settings.xml
+# Copy Maven settings for build
+COPY settings-build.xml /root/.m2/settings.xml
+# Copy runtime settings
+COPY settings.xml /app/settings.xml
 
 # Copy pom.xml separately
 COPY pom.xml .
