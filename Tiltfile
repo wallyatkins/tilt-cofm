@@ -37,5 +37,6 @@ k8s_resource('postgres', port_forwards='5432')
 k8s_resource('nexus', port_forwards='8081')
 
 # Resource dependencies
+k8s_resource('nexus', resource_deps=['postgres'])
 k8s_resource('backend', resource_deps=['postgres', 'nexus'])
 k8s_resource('frontend', resource_deps=['backend'])
