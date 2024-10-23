@@ -21,8 +21,18 @@ docker_build(
 )
 
 # Kubernetes resources
-k8s_yaml('k8s/postgres-pvc.yaml')
-k8s_yaml('k8s/postgres-secret.yaml')
+k8s_yaml([
+    'k8s/postgres-pvc.yaml',
+    'k8s/postgres-secret.yaml'
+])
+
+# Wait for PVCs and secrets
+local_resource(
+    'wait-for-pvcs',
+    'kubectl wait --for=condition=bound pvc/postgres-pvc pvc/nexus-data-pvc --timeout=60s',
+    resource_deps=['postgres-pvc', 'nexus-data-pvc']
+)
+
 k8s_yaml('k8s/nexus.yaml')
 k8s_yaml([
     'k8s/frontend.yaml',
