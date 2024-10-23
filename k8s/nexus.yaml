@@ -32,10 +32,20 @@ spec:
       - name: wait-for-postgres
         image: postgres:13
         command: ['sh', '-c', '
-          echo "Waiting for PostgreSQL..." &&
-          until pg_isready -h postgres.default.svc.cluster.local -p 5432 -U postgres; do
-            sleep 2;
-          done;
+          echo "Testing DNS resolution..." &&
+          nslookup postgres.default.svc.cluster.local &&
+          echo "Testing network connectivity..." &&
+          for i in $(seq 1 30); do
+            nc -z -v postgres.default.svc.cluster.local 5432 && break || 
+            echo "Attempt $i: Connection failed - waiting 5s..." &&
+            sleep 5;
+          done &&
+          echo "Testing PostgreSQL connection..." &&
+          for i in $(seq 1 30); do
+            PGPASSWORD=$POSTGRES_PASSWORD pg_isready -h postgres.default.svc.cluster.local -p 5432 -U postgres && break ||
+            echo "Attempt $i: PostgreSQL not ready - waiting 5s..." &&
+            sleep 5;
+          done &&
           echo "PostgreSQL is ready"
           ']
         env:
