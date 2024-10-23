@@ -29,19 +29,9 @@ spec:
         volumeMounts:
         - name: nexus-data
           mountPath: /nexus-data
-      - name: wait-for-postgres
-        image: postgres:13
-        command: ['sh', '-c', 'apt-get update && apt-get install -y netcat traceroute && rm -rf /var/lib/apt/lists/* && for i in $(seq 1 30); do echo "Attempt $i: Starting checks..."; echo "DNS lookup for postgres:"; getent hosts postgres.default.svc.cluster.local; echo "Network route to postgres:"; traceroute postgres.default.svc.cluster.local 2>&1 || true; echo "Testing port connectivity:"; nc -zv postgres.default.svc.cluster.local 5432 2>&1 || true; echo "Testing PostgreSQL connection:"; if PGPASSWORD=$POSTGRES_PASSWORD pg_isready -h postgres.default.svc.cluster.local -p 5432 -U postgres; then echo "PostgreSQL is ready!"; exit 0; fi; echo "PostgreSQL is not ready yet. Waiting 10 seconds..."; sleep 10; done; echo "Could not connect to PostgreSQL after 30 attempts"; exit 1']
-        command: ['sh', '-c', 'for i in $(seq 1 30); do echo "Attempt $i: Starting checks..."; echo "DNS lookup for postgres:"; getent hosts postgres; echo "Network route to postgres:"; traceroute postgres 2>&1 || true; echo "Testing port connectivity:"; nc -zv postgres 5432 2>&1 || true; echo "Testing PostgreSQL connection:"; if PGPASSWORD=$POSTGRES_PASSWORD pg_isready -h postgres -p 5432 -U postgres; then echo "PostgreSQL is ready!"; exit 0; fi; echo "PostgreSQL is not ready yet. Waiting 10 seconds..."; sleep 10; done; echo "Could not connect to PostgreSQL after 30 attempts"; exit 1']
-        env:
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secret
-              key: postgres-password
       containers:
       - name: nexus
-        image: sonatype/nexus3:3.68.1
+        image: sonatype/nexus3:latest
         ports:
         - containerPort: 8081
         volumeMounts:
