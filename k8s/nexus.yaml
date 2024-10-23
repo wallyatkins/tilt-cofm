@@ -49,6 +49,23 @@ spec:
         volumeMounts:
         - name: nexus-data
           mountPath: /nexus-data
+        env:
+        - name: NEXUS_CONTEXT
+          value: /
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+        - name: NEXUS_DB_URL
+          value: jdbc:postgresql://postgres:5432/nexus
+        - name: NEXUS_DB_USER
+          value: postgres
+        - name: NEXUS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
         resources:
           requests:
             memory: "512Mi"
