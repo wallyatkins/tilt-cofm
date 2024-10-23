@@ -19,11 +19,11 @@ spec:
         image: postgres:13
         command: ['sh', '-c', '
           echo "Testing DNS resolution..." &&
-          getent hosts postgres &&
+          getent hosts postgres.default.svc.cluster.local &&
           echo "Testing network connectivity..." &&
-          nc -zv postgres 5432 &&
+          nc -zv postgres.default.svc.cluster.local 5432 &&
           echo "Testing PostgreSQL connection..." &&
-          PGPASSWORD=$POSTGRES_PASSWORD pg_isready -h postgres -p 5432 -U postgres
+          PGPASSWORD=$POSTGRES_PASSWORD pg_isready -h postgres.default.svc.cluster.local -p 5432 -U postgres
         ']
         env:
         - name: POSTGRES_PASSWORD
