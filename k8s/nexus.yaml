@@ -29,6 +29,21 @@ spec:
         volumeMounts:
         - name: nexus-data
           mountPath: /nexus-data
+      - name: wait-for-postgres
+        image: postgres:13
+        command: ['sh', '-c', '
+          echo "Waiting for PostgreSQL..." &&
+          until pg_isready -h postgres.default.svc.cluster.local -p 5432 -U postgres; do
+            sleep 2;
+          done;
+          echo "PostgreSQL is ready"
+          ']
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
       containers:
       - name: nexus
         image: sonatype/nexus3:latest
@@ -40,16 +55,9 @@ spec:
         env:
         - name: NEXUS_CONTEXT
           value: /
+        - name: INSTALL4J_ADD_VM_PARAMS
+          value: "-Dnexus.datastore.enabled=true -Dnexus.datastore.nexus.type=postgresql -Dnexus.datastore.nexus.host=postgres.default.svc.cluster.local -Dnexus.datastore.nexus.port=5432 -Dnexus.datastore.nexus.database=nexus -Dnexus.datastore.nexus.username=postgres -Dnexus.datastore.nexus.password=$(POSTGRES_PASSWORD)"
         - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secret
-              key: postgres-password
-        - name: NEXUS_DB_URL
-          value: jdbc:postgresql://postgres.default.svc.cluster.local:5432/nexus
-        - name: NEXUS_DB_USER
-          value: postgres
-        - name: NEXUS_DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: postgres-secret
