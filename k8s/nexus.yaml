@@ -31,7 +31,8 @@ spec:
           mountPath: /nexus-data
       - name: wait-for-postgres
         image: postgres:13
-        command: ['sh', '-c', 'for i in $(seq 1 30); do echo "Attempt $i: Testing PostgreSQL connection..."; if PGPASSWORD=$POSTGRES_PASSWORD pg_isready -h postgres -p 5432 -U postgres; then echo "PostgreSQL is ready!"; exit 0; fi; echo "PostgreSQL is not ready yet. Waiting 10 seconds..."; sleep 10; done; echo "Could not connect to PostgreSQL after 30 attempts"; exit 1']
+        command: ['sh', '-c', 'apt-get update && apt-get install -y netcat traceroute && rm -rf /var/lib/apt/lists/* && for i in $(seq 1 30); do echo "Attempt $i: Starting checks..."; echo "DNS lookup for postgres:"; getent hosts postgres; echo "Network route to postgres:"; traceroute postgres 2>&1 || true; echo "Testing port connectivity:"; nc -zv postgres 5432 2>&1 || true; echo "Testing PostgreSQL connection:"; if PGPASSWORD=$POSTGRES_PASSWORD pg_isready -h postgres -p 5432 -U postgres; then echo "PostgreSQL is ready!"; exit 0; fi; echo "PostgreSQL is not ready yet. Waiting 10 seconds..."; sleep 10; done; echo "Could not connect to PostgreSQL after 30 attempts"; exit 1']
+        command: ['sh', '-c', 'for i in $(seq 1 30); do echo "Attempt $i: Starting checks..."; echo "DNS lookup for postgres:"; getent hosts postgres; echo "Network route to postgres:"; traceroute postgres 2>&1 || true; echo "Testing port connectivity:"; nc -zv postgres 5432 2>&1 || true; echo "Testing PostgreSQL connection:"; if PGPASSWORD=$POSTGRES_PASSWORD pg_isready -h postgres -p 5432 -U postgres; then echo "PostgreSQL is ready!"; exit 0; fi; echo "PostgreSQL is not ready yet. Waiting 10 seconds..."; sleep 10; done; echo "Could not connect to PostgreSQL after 30 attempts"; exit 1']
         env:
         - name: POSTGRES_PASSWORD
           valueFrom:
