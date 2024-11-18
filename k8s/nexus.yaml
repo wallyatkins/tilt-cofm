@@ -29,31 +29,6 @@ spec:
         volumeMounts:
         - name: nexus-data
           mountPath: /nexus-data
-      - name: wait-for-postgres
-        image: postgres:13
-        command: ['sh', '-c', '
-          echo "Testing DNS resolution..." &&
-          nslookup postgres.default.svc.cluster.local &&
-          echo "Testing network connectivity..." &&
-          for i in $(seq 1 30); do
-            nc -z -v postgres.default.svc.cluster.local 5432 && break || 
-            echo "Attempt $i: Connection failed - waiting 5s..." &&
-            sleep 5;
-          done &&
-          echo "Testing PostgreSQL connection..." &&
-          for i in $(seq 1 30); do
-            PGPASSWORD=$POSTGRES_PASSWORD pg_isready -h postgres.default.svc.cluster.local -p 5432 -U postgres && break ||
-            echo "Attempt $i: PostgreSQL not ready - waiting 5s..." &&
-            sleep 5;
-          done &&
-          echo "PostgreSQL is ready"
-          ']
-        env:
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secret
-              key: postgres-password
       containers:
       - name: nexus
         image: sonatype/nexus3:latest
@@ -62,16 +37,6 @@ spec:
         volumeMounts:
         - name: nexus-data
           mountPath: /nexus-data
-        env:
-        - name: NEXUS_CONTEXT
-          value: /
-        - name: INSTALL4J_ADD_VM_PARAMS
-          value: "-Dnexus.datastore.enabled=true -Dnexus.datastore.nexus.type=postgresql -Dnexus.datastore.nexus.host=postgres.default.svc.cluster.local -Dnexus.datastore.nexus.port=5432 -Dnexus.datastore.nexus.database=nexus -Dnexus.datastore.nexus.username=postgres -Dnexus.datastore.nexus.password=$(POSTGRES_PASSWORD)"
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secret
-              key: postgres-password
         resources:
           requests:
             memory: "512Mi"
@@ -99,7 +64,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nexus
+  name: nexus-service
 spec:
   selector:
     app: nexus

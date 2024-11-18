@@ -1,4 +1,6 @@
 # Tiltfile
+load('ext://namespace', 'namespace_create', 'namespace_inject')
+namespace_create('odin')
 
 # Frontend
 docker_build(
@@ -21,14 +23,12 @@ docker_build(
 )
 
 # Kubernetes resources
-k8s_yaml([
-    'k8s/postgres-pvc.yaml',
-    'k8s/postgres-secret.yaml',
-    'k8s/nexus.yaml',
-    'k8s/frontend.yaml',
-    'k8s/backend.yaml',
-    'k8s/postgres.yaml'
-])
+k8s_yaml(namespace_inject('k8s/postgres-pvc.yaml', 'odin'))
+k8s_yaml(namespace_inject('k8s/postgres-secret.yaml', 'odin'))
+k8s_yaml(namespace_inject('k8s/nexus.yaml', 'odin'))
+k8s_yaml(namespace_inject('k8s/frontend.yaml', 'odin'))
+k8s_yaml(namespace_inject('k8s/backend.yaml', 'odin'))
+k8s_yaml(namespace_inject('k8s/postgres.yaml', 'odin'))
 
 # Port forwards
 k8s_resource('frontend', port_forwards='3000')
